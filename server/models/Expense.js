@@ -5,7 +5,7 @@ const Category = require('./Category');
 
 const Expense = sequelize.define('Expense', {
   description: DataTypes.STRING,
-  amount: { type: DataTypes.DECIMAL(10,2), allowNull: false },
+  amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
   spent_at: { type: DataTypes.DATEONLY, allowNull: false },
 }, {
   tableName: 'expenses',
