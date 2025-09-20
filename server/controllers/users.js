@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
 const User = require("../models/User");
+const HttpError = require('../models/httpError');
 
 const getUserByEmail = async (email) => {
   return await User.findOne({ where: { email: email } })
@@ -9,19 +11,24 @@ const hashPassword = async (password) => {
   return await bcrypt.hash(password, 10);
 }
 
+const generateToken = async (user) => {
+  return await jwt.sign({ id: user.id, email: user.email, name: user.name }, 'key', { expiresIn: '1h' })
+}
+
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await getUserByEmail(email)
 
     if (!user) {
-      return res.status(404).json({ message: 'user not found' });
+      return next(new HttpError('user not found', 404))
     }
     const isValidPass = await bcrypt.compare(password, user.password_hash)
-    if (!isValidPass) return res.status(401).json({ Message: 'invalid use/pass' })
-    res.status(200).json({ message: 'login in success', user })
+    if (!isValidPass) return next(new HttpError('Invalid User/Pass', 401))
+    const token = await generateToken(user);
+    res.status(200).json({ user: { id: user.id, email: user.email, name: user.name }, token })
   } catch (err) {
-    return res.status(500).json({ Message: 'something went wrong' })
+    return next(new HttpError('Something went wrong', 500))
   }
 
 }
@@ -33,13 +40,14 @@ const signup = async (req, res, next) => {
     const user = await getUserByEmail(email)
 
     if (user) {
-      return res.status(400).json({ message: 'user already exist' })
+      return next(new HttpError('user already exist', 400))
     }
     const hashedPass = await hashPassword(password);
-    const newUser = await User.create({ name, email, password_hash: hashedPass })
-    res.status(201).json({ message: 'sign up success', newUser })
+    const newUser = await User.create({ name, email, password_hash: hashedPass });
+    const token = await generateToken(newUser);
+    res.status(201).json({ token, user: { id: newUser.id, email: newUser.email, name: newUser.name } })
   } catch (err) {
-    return res.status(500).json({ Message: 'something went wrong' })
+    return next(new HttpError('Something went wrong', 500))
   }
 
 }
