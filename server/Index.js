@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors')
 const sequelize = require('./config/database');
 const expenseRoutes = require('./routes/expenses');
 const userRoutes = require('./routes/users');
@@ -9,6 +10,7 @@ const HttpError = require('./models/httpError');
 // const Expense = require('./models/Expense');
 
 const app = express();
+app.use(cors())
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('Expense Tracker API is running 🚀'));
