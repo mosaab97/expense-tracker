@@ -10,7 +10,10 @@ const HttpError = require('./models/httpError');
 // const Expense = require('./models/Expense');
 
 const app = express();
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:5173', // your React dev server
+  credentials: true,               // allow cookies / auth headers
+}))
 app.use(express.json());
 
 app.get('/', (req, res) => res.send('Expense Tracker API is running 🚀'));

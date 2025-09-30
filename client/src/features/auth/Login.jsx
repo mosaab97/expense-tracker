@@ -1,31 +1,82 @@
-import { useNavigate } from "react-router"
-import Button from "../../components/Button"
-import Input from "../../components/Input"
+import { useForm } from "react-hook-form";
+import { useAuth } from "../../context/authContext/AuthContext";
+import FormInput from "../../components/FormInput";
+import toast from "react-hot-toast";
 
 const Login = () => {
-  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    try {
+      console.log("first")
+      await login(data);
+      toast.success("Welcome back! 🎉");
+    } catch (err) {
+      console.log(err)
+      setError("root", { message: "Invalid email or password" });
+      toast.error("Login failed. Please check your credentials.");
+    }
+  };
+
   return (
-    <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" className="mx-auto h-10 w-auto" />
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Log in to your account</h2>
-      </div>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white shadow-lg rounded-xl p-8 w-96 space-y-6"
+      >
+        <h2 className="text-2xl font-bold text-center text-gray-700">
+          Login
+        </h2>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form action="#" method="POST" className="space-y-6">
-          <Input id='email' name='email' type='email' label='Email address' />
-          <Input id='password' name='password' type='password' label='Password' />
-          <Button type='submit' text='Log in' />
-        </form>
+        <FormInput
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          register={register}
+          rules={{
+            required: "Email is required",
+            pattern: { value: /^\S+@\S+$/, message: "Invalid email address" },
+          }}
+          errors={errors}
+        />
 
-        <p className="mt-10 text-center text-sm/6 text-gray-500">
-          Not a member?
-          <button onClick={() => navigate('/signup')} className="font-semibold text-indigo-600 hover:text-indigo-500, cursor-pointer"> Sign Up</button>
-        </p>
-      </div>
+        <FormInput
+          label="Password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          register={register}
+          rules={{
+            required: "Password is required",
+            minLength: { value: 6, message: "At least 6 characters" },
+          }}
+          errors={errors}
+        />
+
+        {errors.root && (
+          <p className="text-red-600 text-sm text-center">
+            {errors.root.message}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50"
+        >
+          {isSubmitting ? "Logging in..." : "Login"}
+        </button>
+      </form>
     </div>
+  );
+};
 
-  )
-}
-
-export default Login
+export default Login;

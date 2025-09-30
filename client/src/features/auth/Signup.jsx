@@ -1,34 +1,105 @@
-import { useNavigate } from "react-router";
-import Button from "../../components/Button"
-import Input from "../../components/Input"
+import { useForm } from "react-hook-form";
+import { useAuth } from "../../context/authContext/AuthContext";
+import FormInput from "../../components/FormInput";
+import toast from "react-hot-toast";
 
 const Signup = () => {
-  const navigate = useNavigate();
+  const { signup } = useAuth();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    if (data.password !== data.confirmPassword) {
+      setError("confirmPassword", { message: "Passwords do not match" });
+      return;
+    }
+    try {
+      await signup(data);
+      toast.success("Account created! 🚀");
+    } catch (err) {
+      console.log(err)
+      setError("root", { message: "Signup failed" });
+      toast.error( err.response.data.message || "Signup failed. Try again later.");
+    }
+  };
 
   return (
-    <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" className="mx-auto h-10 w-auto" />
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
-      </div>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white shadow-lg rounded-xl p-8 w-96 space-y-6"
+      >
+        <h2 className="text-2xl font-bold text-center text-gray-700">
+          Sign Up
+        </h2>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form action="#" method="POST" className="space-y-6">
-          <Input id='name' name='name' type='text' label='Name' />
-          <Input id='email' name='email' type='email' label='Email address' />
-          <Input id='password' name='password' type='password' label='Password' />
-          <Button type='submit' text='Sign up' />
+        <FormInput
+          label="Name"
+          name="name"
+          placeholder="John Doe"
+          register={register}
+          rules={{ required: "Name is required" }}
+          errors={errors}
+        />
 
-        </form>
+        <FormInput
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          register={register}
+          rules={{
+            required: "Email is required",
+            pattern: { value: /^\S+@\S+$/, message: "Invalid email address" },
+          }}
+          errors={errors}
+        />
 
-        <p className="mt-10 text-center text-sm/6 text-gray-500">
-          Have an account ?
-          <button onClick={() => navigate('/login')} className="font-semibold text-indigo-600 hover:text-indigo-500, cursor-pointer"> Log in</button>
-        </p>
-      </div>
+        <FormInput
+          label="Password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          register={register}
+          rules={{
+            required: "Password is required",
+            minLength: { value: 6, message: "At least 6 characters" },
+          }}
+          errors={errors}
+        />
+
+        <FormInput
+          label="Confirm Password"
+          name="confirmPassword"
+          type="password"
+          placeholder="••••••••"
+          register={register}
+          rules={{ required: "Please confirm your password" }}
+          errors={errors}
+        />
+
+        {errors.root && (
+          <p className="text-red-600 text-sm text-center">
+            {errors.root.message}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition disabled:opacity-50"
+        >
+          {isSubmitting ? "Signing up..." : "Sign Up"}
+        </button>
+      </form>
     </div>
+  );
+};
 
-  )
-}
-
-export default Signup
+export default Signup;
