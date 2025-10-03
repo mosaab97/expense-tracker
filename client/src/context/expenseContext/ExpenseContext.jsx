@@ -22,7 +22,8 @@ export const ExpenseProvider = ({ children }) => {
 
   const createExpense = async (expense) => {
     const { data } = await addExpense(expense);
-    setExpenses((prev) => [data, ...prev]);
+    console.log(data)
+    setExpenses((prev) => [...prev, data.expense]);
   };
 
   const editExpense = async (id, updated) => {
