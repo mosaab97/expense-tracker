@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormInput from "../../../components/FormInput";
 
-const ExpenseForm = ({ onSubmit, initialData = {}, submitLabel = "Add Expense" }) => {
+const ExpenseForm = ({ onSubmit, initialData = {} }) => {
+  const [submitLabel, setSubmitLabel] = useState("Add Expense");
   const {
     register,
     handleSubmit,
@@ -11,8 +13,32 @@ const ExpenseForm = ({ onSubmit, initialData = {}, submitLabel = "Add Expense" }
     defaultValues: initialData,
   });
 
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setSubmitLabel("Update Expense");
+
+      // Convert date to "YYYY-MM-DD" for <input type="date" />
+      const formattedData = {
+        ...initialData,
+        spentAt: initialData.spentAt
+          ? new Date(initialData.spentAt).toISOString().split("T")[0]
+          : "",
+        categoryId: String(initialData.categoryId || ""),
+      };
+
+      reset(formattedData);
+    } else {
+      setSubmitLabel("Add Expense");
+      reset({
+        description: "",
+        amount: "",
+        spentAt: "",
+        categoryId: "",
+      });
+    }
+  }, [initialData, reset]);
+
   const submitHandler = async (data) => {
-    console.log(data)
     try {
       await onSubmit(data);
       reset();
@@ -72,15 +98,16 @@ const ExpenseForm = ({ onSubmit, initialData = {}, submitLabel = "Add Expense" }
         </label>
         <select
           {...register("categoryId", { required: "Category is required" })}
-          className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-green-300"
+          rules={{ required: "category is required" }}
+          className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-green-300 ${errors.categoryId && "border-red-500 focus:ring-red-400"}`}
         >
           <option value="">Select category</option>
           <option value="1">Category 1</option>
           <option value="2">Category 2</option>
           <option value="3">Category 3</option>
         </select>
-        {errors.category && (
-          <p className="text-red-600 text-sm mt-1">{errors.category.message}</p>
+        {errors.categoryId && (
+          <p className="text-red-600 text-sm mt-1">{errors.categoryId.message}</p>
         )}
       </div>
 

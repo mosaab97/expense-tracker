@@ -5,12 +5,12 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
         <p className="font-medium">{expense.description}</p>
         <p className="text-gray-500">${expense.amount}</p>
         <p className="text-gray-400 text-sm">{expense.date}</p>
-        {expense.category_id && <p className="text-gray-400 text-sm">{expense.category_id}</p>}
+        {expense.categoryId && <p className="text-gray-400 text-sm">{expense.categoryId}</p>}
       </div>
 
       <div className="flex space-x-2">
         <button
-          onClick={() => onEdit(expense.id, expense)}
+          onClick={() => onEdit(expense)}
           className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
         >
           Edit

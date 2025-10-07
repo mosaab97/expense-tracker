@@ -15,7 +15,6 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      console.log("first")
       await login(data);
       toast.success("Welcome back! 🎉");
     } catch (err) {

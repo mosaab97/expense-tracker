@@ -11,7 +11,6 @@ export const ExpenseProvider = ({ children }) => {
     setLoading(true);
     try {
       const { data } = await getExpenses();
-      console.log(data)
       setExpenses(data.expenses);
     } catch (err) {
       console.error(err);
@@ -22,13 +21,12 @@ export const ExpenseProvider = ({ children }) => {
 
   const createExpense = async (expense) => {
     const { data } = await addExpense(expense);
-    console.log(data)
     setExpenses((prev) => [...prev, data.expense]);
   };
 
-  const editExpense = async (id, updated) => {
-    const { data } = await updateExpense(id, updated);
-    setExpenses((prev) => prev.map((e) => (e.id === id ? data : e)));
+  const editExpense = async (updated) => {
+    const { data } = await updateExpense(updated.id, updated);
+    setExpenses((prev) => prev.map((e) => (e.id === updated.id ? data.results : e)));
   };
 
   const removeExpense = async (id) => {

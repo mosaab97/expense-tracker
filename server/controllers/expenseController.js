@@ -6,7 +6,7 @@ const addExpense = async (req, res) => {
   try {
     const user_id = req.user.id;;
     const { description, amount, categoryId, spentAt } = req.body;
-    const expense = await Expense.create({ description, amount, spent_at: spentAt, user_id, category_id: categoryId });
+    const expense = await Expense.create({ description, amount, spentAt: spentAt, user_id, categoryId: categoryId });
     res.status(201).json({ success: true, expense });
   } catch (error) {
     return next(new HttpError('Something went Wrong', 500))
@@ -23,6 +23,7 @@ const getExpensesByUserId = async (req, res, next) => {
     })
     return res.status(200).json({ expenses })
   } catch (err) {
+    console.log(err)
     return next(new HttpError('Something went wrong', 500))
   }
 }
@@ -37,10 +38,10 @@ const updateExpenseById = async (req, res, next) => {
     if (expense.user_id !== user_id) return next(new HttpError('Not Authorized', 401));
 
     const updatedExpense = {
-      category_id: categoryId || expense.category_id,
+      categoryId: categoryId || expense.categoryId,
       description: description || expense.description,
       amount: amount || expense.amount,
-      spent_at: spentAt || expense.spent_at
+      spentAt: spentAt || expense.spentAt
     }
     const results = await expense.update(updatedExpense, {
       where: {
